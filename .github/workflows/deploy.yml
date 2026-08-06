@@ -32,7 +32,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # Uploads all files in the root folder
+          path: './frontend' # Point directly to your frontend folder
 
       - name: Deploy to GitHub Pages
         id: deployment
