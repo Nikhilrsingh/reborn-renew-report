@@ -1,113 +1,114 @@
-const SHEET_NAME = "Sheet1";
+/**
+ * Reborn Fitness Club - Backend & Sheet Stylizer
+ */
 
-const HEADERS = [
-  "Sr No",
-  "Member Name",
-  "Package",
-  "Category",
-  "Duration",
-  "Start Date",
-  "Package Fees",
-  "Discount",
-  "Final Paid",
-  "Payment Mode",
-  "Entry Time"
-];
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
 
-// ===============================
-// Setup Sheet
-// ===============================
-function setupSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_NAME);
+  try {
+    var rawData = e.postData.contents;
+    var data = JSON.parse(rawData);
 
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
+    // Identify target tab
+    var sheetName = (data.action === 'saveNewMemberEntry') ? 'NewMembers' : 'RenewMembers';
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(sheetName);
+
+    // Column Order:
+    // Sr No | Member Name | Package | Category | Duration | Start Date | Package Fees | Discount | Final Paid | Payment Mode | Cash (₹) | Online (₹) | Timestamp | Entry Done By
+    var headers = [
+      'Sr No',
+      'Member Name',
+      'Package',
+      'Category',
+      'Duration',
+      'Start Date',
+      'Package Fees',
+      'Discount',
+      'Final Paid',
+      'Payment Mode',
+      'Cash (₹)',
+      'Online (₹)',
+      'Timestamp',
+      'Entry Done By'
+    ];
+
+    // Create & style sheet if it doesn't exist
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      sheet.appendRow(headers);
+      applySheetStyles(sheet);
+    }
+
+    // Append row matching the exact order
+    var rowData = [
+      data.name || '',
+      data.package || '',
+      data.category || '',
+      data.duration || '',
+      data.startDate || '',
+      data.packageFees || 0,
+      data.discount || 0,
+      data.finalAmount || 0,
+      data.paymentMode || '',
+      data.cashAmount || 0,
+      data.onlineAmount || 0,
+      data.timestamp || '',
+      data.createdBy || ''
+    ];
+
+    sheet.appendRow(rowData);
+
+    // Dynamic row formatting
+    var lastRow = sheet.getLastRow();
+    var rowRange = sheet.getRange(lastRow, 1, 1, headers.length);
+    rowRange.setFontFamily("Inter").setFontSize(10).setVerticalAlignment("middle");
+
+    // Alignments
+    sheet.getRange(lastRow, 1).setHorizontalAlignment("center"); // Sr No
+    sheet.getRange(lastRow, 3, 1, 4).setHorizontalAlignment("center"); // Package, Category, Duration, Start Date
+    sheet.getRange(lastRow, 7, 1, 3).setNumberFormat("₹#,##0").setHorizontalAlignment("right"); // Fees, Disc, Final
+    sheet.getRange(lastRow, 10).setHorizontalAlignment("center"); // Payment Mode
+    sheet.getRange(lastRow, 11, 1, 2).setNumberFormat("₹#,##0").setHorizontalAlignment("right"); // Cash, Online
+    sheet.getRange(lastRow, 13, 1, 2).setHorizontalAlignment("center"); // Timestamp, Done By
+
+    // Alternating zebra striping
+    if (lastRow % 2 === 0) {
+      rowRange.setBackground("#fdf2f2"); // Soft red-tinted light row
+    } else {
+      rowRange.setBackground("#ffffff");
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', error: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
   }
+}
 
-  sheet.clear();
-  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-
-  const header = sheet.getRange(1, 1, 1, HEADERS.length);
-  header
+// Applies modern theme, borders, sticky header, and auto dimensions
+function applySheetStyles(sheet) {
+  var headerRange = sheet.getRange(1, 1, 1, 14);
+  headerRange
+    .setBackground("#d90429") // Sporty Reborn Red
+    .setFontColor("#ffffff")
     .setFontWeight("bold")
-    .setBackground("#E50914")
-    .setFontColor("#FFFFFF")
+    .setFontSize(10)
+    .setFontFamily("Inter")
     .setHorizontalAlignment("center")
     .setVerticalAlignment("middle");
 
+  sheet.setRowHeight(1, 36);
   sheet.setFrozenRows(1);
-
-  const existingFilter = sheet.getFilter();
-  if (existingFilter) {
-    existingFilter.remove();
-  }
-  sheet.getDataRange().createFilter();
-
-  sheet.getRange(2, 7, Math.max(sheet.getMaxRows(), 2), 3).setNumberFormat("₹#,##0");
-  sheet.getRange(2, 6, Math.max(sheet.getMaxRows(), 2), 1).setNumberFormat("dd-MMM-yyyy");
-
-  sheet.autoResizeColumns(1, HEADERS.length);
-  SpreadsheetApp.flush();
+  sheet.getRange(1, 1, 100, 14).setBorder(true, true, true, true, true, true, "#e2e8f0", SpreadsheetApp.BorderStyle.SOLID);
+  sheet.autoResizeColumns(1, 14);
 }
 
-// ===============================
-// Save Member
-// ===============================
-function doPost(e) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];
-
-    if (sheet.getLastRow() === 0) {
-      setupSheet();
-    }
-
-    const data = JSON.parse(e.postData.contents);
-    const sr = Math.max(1, sheet.getLastRow());
-
-    sheet.appendRow([
-      sr,
-      data.memberName || "",
-      data.packageType || "",
-      data.category || "",
-      data.duration || "",
-      data.startDate || "",
-      Number(data.fees) || 0,
-      Number(data.discount) || 0,
-      Number(data.finalPaid) || 0,
-      data.paymentMode || "",
-      Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "dd-MMM-yyyy HH:mm:ss")
-    ]);
-
-    const row = sheet.getLastRow();
-    sheet.getRange(row, 1, 1, 11)
-      .setHorizontalAlignment("center")
-      .setVerticalAlignment("middle");
-
-    if (row % 2 === 0) {
-      sheet.getRange(row, 1, 1, 11).setBackground("#FFF5F5");
-    } else {
-      sheet.getRange(row, 1, 1, 11).setBackground("#FFFFFF");
-    }
-
-    sheet.getRange(row, 7, 1, 3).setNumberFormat("₹#,##0");
-    sheet.getRange(row, 6).setNumberFormat("dd-MMM-yyyy");
-
-    sheet.autoResizeColumns(1, 11);
-
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: true, message: "Added successfully" })
-    ).setMimeType(ContentService.MimeType.JSON);
-
-  } catch (err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: false, message: err.toString() })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// ===============================
-function doGet() {
-  return ContentService.createTextOutput("Reborn Fitness Running");
+function doGet(e) {
+  return ContentService.createTextOutput("Reborn API running.");
 }

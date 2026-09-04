@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reborn Fitness Club - New Member Generator</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div style="margin-bottom: 15px;">
+      <a href="index.html" class="btn btn-secondary" style="text-decoration: none;">← Back to Dashboard</a>
+    </div>
+
+    <div class="header">
+      <img src="assets/logo.png" alt="Reborn Logo" class="logo" id="logo">
+      <h1 class="title">REBORN FITNESS CLUB</h1>
+      <p class="subtitle">NEW MEMBER ADMISSION REPORT GENERATOR</p>
+    </div>
+
+    <!-- Live Dynamic Calculation Summary -->
+    <div class="card" style="margin-bottom: 20px; background: #1a1a1a; border-left: 4px solid var(--primary-color);">
+      <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-secondary);">Live Entry Preview</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; font-size: 0.9rem;">
+        <div>Package Fees: <strong id="sumPackageFees" style="color: #fff;">₹0</strong></div>
+        <div>Discount: <strong id="sumDiscount" style="color: #f87171;">₹0</strong></div>
+        <div>Final Paid: <strong id="sumFinalAmount" style="color: var(--success-color);">₹0</strong></div>
+        <div>Cash Component: <strong id="sumCash">₹0</strong></div>
+        <div>Online Component: <strong id="sumOnline">₹0</strong></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <form id="newMemberForm">
+        <!-- Row 1: Sr No & Member Name -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Member Name</label>
+            <input type="text" id="name" required placeholder="Enter member name">
+          </div>
+        </div>
+
+        <!-- Row 2: Package & Category -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="package">Package</label>
+            <select id="package" required>
+              <option value="" disabled selected>Select Package</option>
+              <option value="Gym only">Gym only</option>
+              <option value="Cardio + Gym">Cardio + Gym</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" required>
+              <option value="" disabled selected>Select Category</option>
+              <option value="Male">Male</option>
+              <option value="Women">Women</option>
+              <option value="Children">Children</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 3: Duration & Start Date -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="duration">Duration</label>
+            <select id="duration" required>
+              <option value="" disabled selected>Select Duration</option>
+              <option value="1 month">1 month</option>
+              <option value="3 months">3 months</option>
+              <option value="6 months">6 months</option>
+              <option value="1 year">1 year</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" required>
+          </div>
+        </div>
+
+        <!-- Row 4: Package Fees, Discount, Final Paid Amount -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="packageFees">Package Fees (₹)</label>
+            <input type="number" id="packageFees" required placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label for="discount">Discount (₹)</label>
+            <input type="number" id="discount" placeholder="0" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label for="finalAmount">Final Paid Amount (₹)</label>
+            <input type="number" id="finalAmount" required placeholder="0" min="0">
+          </div>
+        </div>
+
+        <!-- Row 5: Payment Mode -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="paymentMode">Payment Mode</label>
+            <select id="paymentMode" required>
+              <option value="" disabled selected>Select Mode</option>
+              <option value="Cash">Cash</option>
+              <option value="Online">Online</option>
+              <option value="Cash + Online">Cash + Online</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="createdBy">Entry Done By</label>
+            <select id="createdBy" required>
+              <option value="" disabled selected>Select Staff</option>
+              <option value="Shravan">Shravan</option>
+              <option value="Gopi">Gopi</option>
+              <option value="Ankit">Ankit</option>
+              <option value="Rutvik">Rutvik</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 6: Split Section (Shows if Cash + Online) -->
+        <div id="splitSection" style="display: none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cashAmount">Cash Amount (₹)</label>
+              <input type="number" id="cashAmount" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+              <label for="onlineAmount">Online Amount (₹)</label>
+              <input type="number" id="onlineAmount" placeholder="0" min="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+  <!-- Combined Save & WhatsApp Button -->
+  <button type="submit" id="saveBtn" class="btn btn-whatsapp" style="width: 100%; font-size: 1rem; padding: 14px;">
+    💾 Save Entry & Share to WhatsApp
+  </button>
+
+  <button type="button" id="resetBtn" class="btn btn-secondary" style="width: 100%;">
+    Clear Form
+  </button>
+</div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/new-member.js"></script>
+</body>
+</html>

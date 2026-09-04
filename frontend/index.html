@@ -3,207 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reborn Renewal Entry</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Reborn Fitness Club - Operations Hub</title>
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="home-body">
+  <div class="home-wrapper">
+    <div class="header">
+      <img src="assets/logo.png" alt="Reborn Fitness Club Logo" class="logo" style="max-height: 85px;">
+      <h1 class="title">REBORN FITNESS CLUB</h1>
+      <p class="subtitle">Operations & Membership Portal</p>
+    </div>
 
-  <!-- Toast Container -->
-  <div id="toast-container" class="toast-container"></div>
-
-  <div class="app-container">
-
-    <header class="app-header">
-  <div class="brand">
-    <img src="assets/logo.png" alt="Reborn Logo" class="brand-logo">
-    <h1>Renewal Portal</h1>
-  </div>
-  <p class="subtitle">Submit membership renewals directly to Google Sheets</p>
-</header>
-
-    <main class="main-content">
-      <!-- FORM SECTION -->
-      <section class="card form-card">
-        <h2 class="card-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-          Member Details
-        </h2>
-
-        <form id="renewal-form" novalidate>
-          <div class="form-grid">
-
-            <!-- Member Name -->
-            <div class="form-group full-width">
-              <label for="memberName">Member Name <span class="required">*</span></label>
-              <input type="text" id="memberName" name="memberName" placeholder="Enter full name" required>
-            </div>
-
-            <!-- Package -->
-            <div class="form-group">
-              <label for="package">Package <span class="required">*</span></label>
-              <select id="package" name="package" required>
-                <option value="">Select Package</option>
-                <option value="Gym Only">Gym Only</option>
-                <option value="Cardio + Gym">Cardio + Gym</option>
-                <option value="Personal Training">Personal Training</option>
-                <!-- <option value="Crossfit">Crossfit</option> -->
-              </select>
-            </div>
-
-            <!-- Category -->
-<div class="form-group">
-  <label for="category">Category <span class="required">*</span></label>
-  <select id="category" name="category" required>
-    <option value="">Select Category</option>
-    <option value="Male">Male</option>
-    <option value="Women">Women</option>
-    <option value="Children">Children</option>
-  </select>
-</div>
-
-            <!-- Duration -->
-            <div class="form-group">
-              <label for="duration">Duration <span class="required">*</span></label>
-              <select id="duration" name="duration" required>
-                <option value="">Select Duration</option>
-                <option value="1 Month">1 Month</option>
-                <option value="3 Months">3 Months</option>
-                <option value="6 Months">6 Months</option>
-                <option value="1 Year">1 Year</option>
-              </select>
-            </div>
-
-            <!-- Start Date -->
-            <div class="form-group">
-              <label for="startDate">Start Date <span class="required">*</span></label>
-              <input type="date" id="startDate" name="startDate" required>
-            </div>
-
-            <!-- Package Fees -->
-            <div class="form-group">
-              <label for="packageFees">Package Fees (₹) <span class="required">*</span></label>
-              <input type="number" id="packageFees" name="packageFees" min="0" placeholder="0" required>
-            </div>
-
-            <!-- Discount -->
-            <div class="form-group">
-              <label for="discount">Discount (₹)</label>
-              <input type="number" id="discount" name="discount" min="0" value="0" placeholder="0">
-            </div>
-
-            <!-- Final Paid -->
-            <div class="form-group full-width">
-              <div class="label-with-action">
-                <label for="finalPaid">Final Paid Amount (₹) <span class="required">*</span></label>
-                <button type="button" id="btn-reset-auto" class="btn-text" title="Reset to auto-calculated value">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                  Reset Auto
-                </button>
-              </div>
-              <input type="number" id="finalPaid" name="finalPaid" min="0" placeholder="0" required>
-            </div>
-
-            <!-- Payment Mode -->
-            <div class="form-group full-width">
-              <label for="paymentMode">Payment Mode <span class="required">*</span></label>
-              <select id="paymentMode" name="paymentMode" required>
-                <option value="Cash">Cash</option>
-                <option value="Online">Online</option>
-                <option value="Cash + Online">Cash + Online</option>
-              </select>
-            </div>
-
-            <!-- Conditional Payment Fields -->
-            <div id="cash-amount-group" class="form-group payment-split-field">
-              <label for="cashAmount">Cash Amount (₹) <span class="required">*</span></label>
-              <input type="number" id="cashAmount" name="cashAmount" min="0" placeholder="0">
-            </div>
-
-            <div id="online-amount-group" class="form-group payment-split-field">
-              <label for="onlineAmount">Online Amount (₹) <span class="required">*</span></label>
-              <input type="number" id="onlineAmount" name="onlineAmount" min="0" placeholder="0">
-            </div>
-
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" id="submit-btn" class="btn btn-primary">
-              <span class="btn-text-content">Submit Renewal</span>
-              <span class="spinner hidden"></span>
-            </button>
-          </div>
-          
-        </form>
-      </section>
-      
-      <a href="https://docs.google.com/spreadsheets/d/1sh3iXmKBPSLt5SxrJobX1SIxdhT1zrMnb7mTmAakW8E/edit?usp=sharing" 
-   target="_blank" 
-   rel="noopener noreferrer" 
-   class="custom-btn">View Entries</a>
-
-      <!-- LIVE SUMMARY CARD -->
-      <section class="card summary-card">
-        <div class="summary-header">
-          <h2 class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            Live Summary
-          </h2>
-          <span class="live-indicator"><span class="pulse"></span> LIVE</span>
+    <div class="menu-grid">
+      <!-- 1. Renew Member Generator -->
+      <a href="renew-generator.html" class="menu-card">
+        <span class="card-icon">🔄</span>
+        <div class="card-text">
+          <h3>Renew Member</h3>
+          <p>Report Generator</p>
         </div>
+      </a>
 
-        <div class="summary-list">
-          <div class="summary-item">
-            <span class="summary-label">Member</span>
-            <span class="summary-value" id="sum-member-name">—</span>
-          </div>
-
-          <div class="summary-item">
-            <span class="summary-label">Package</span>
-            <span class="summary-value" id="sum-package">—</span>
-          </div>
-
-          <div class="summary-item">
-            <span class="summary-label">Category</span>
-            <span class="summary-value" id="sum-category">—</span>
-          </div>
-
-          <div class="summary-item">
-            <span class="summary-label">Duration</span>
-            <span class="summary-value" id="sum-duration">—</span>
-          </div>
-
-          <div class="summary-item">
-            <span class="summary-label">Start Date</span>
-            <span class="summary-value" id="sum-start-date">—</span>
-          </div>
-
-          <div class="summary-item">
-            <span class="summary-label">Package Fees</span>
-            <span class="summary-value" id="sum-fees">₹0</span>
-          </div>
-
-          <div class="summary-item">
-            <span class="summary-label">Discount</span>
-            <span class="summary-value text-accent" id="sum-discount">₹0</span>
-          </div>
-
-          <div class="summary-item highlight">
-            <span class="summary-label">Final Paid</span>
-            <span class="summary-value" id="sum-final-paid">₹0</span>
-          </div>
-
-          <div class="summary-item payment-summary-box">
-            <span class="summary-label">Payment Breakdown</span>
-            <span class="summary-value" id="sum-payment-summary">—</span>
-          </div>
+      <!-- 2. New Member Generator -->
+      <a href="new-generator.html" class="menu-card">
+        <span class="card-icon">✨</span>
+        <div class="card-text">
+          <h3>New Member</h3>
+          <p>Report Generator</p>
         </div>
-      </section>
-    </main>
-  </div>
+      </a>
 
-  <script src="js/script.js"></script>
+      <!-- 3. View Renew Sheet -->
+      <a href="https://docs.google.com/spreadsheets/d/18N5sUidC148EUs3V3q64TInZDBxF0Pt3JbyJL6O5G3A/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="menu-card">
+        <span class="card-icon">📋</span>
+        <div class="card-text">
+          <h3>View Renew Report</h3>
+          <p>Open Google Sheet ↗</p>
+        </div>
+      </a>
+
+      <!-- 4. View New Member Sheet -->
+      <a href="https://docs.google.com/spreadsheets/d/1Bxs0GPR1C8vC_RkyQnW_yb78ugLtBcK-QB5PxpF3ruU/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="menu-card">
+        <span class="card-icon">📊</span>
+        <div class="card-text">
+          <h3>View New Member Report</h3>
+          <p>Open Google Sheet ↗</p>
+        </div>
+      </a>
+    </div>
+  </div>
 </body>
 </html>
