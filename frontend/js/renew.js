@@ -1,12 +1,30 @@
 const STORAGE_KEY = 'reborn_renew_entries';
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1UefEJKUYTkntZo4RjtyZVx2rMxok-rFkWV2UgEZi8YIcCc_-tvd5lJ6BPUiW1ALr6w/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/YOUR_RENEW_SCRIPT_ID/exec';
+const GROUP_URL = 'https://chat.whatsapp.com/FK75LJTbMuVHjpwvbeCYvA?s=cl&p=i&mlu=4&ilr=4';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 
+// Price matrix derived directly from the Reborn plans poster
+const PRICING_TABLE = {
+  "Gym only": {
+    "Gents": { "1 month": 1200, "3 months": 3300, "6 months": 6000, "1 year": 10800 },
+    "Women & Children": { "1 month": 1000, "3 months": 2700, "6 months": 4800, "1 year": 8400 }
+  },
+  "Cardio + Gym": {
+    "Gents": { "1 month": 1500, "3 months": 4200, "6 months": 7800, "1 year": 14400 },
+    "Women & Children": { "1 month": 1300, "3 months": 3600, "6 months": 6600, "1 year": 12000 }
+  }
+};
+
 // Form elements
+const packageSelect = document.getElementById('package');
+const categorySelect = document.getElementById('category');
+const durationSelect = document.getElementById('duration');
+const gapStatusSelect = document.getElementById('gapStatus');
+
 const packageFeesInput = document.getElementById('packageFees');
 const discountInput = document.getElementById('discount');
 const finalAmountInput = document.getElementById('finalAmount');
@@ -24,20 +42,53 @@ const sumOnline = document.getElementById('sumOnline');
 
 let isManualFinalAmount = false;
 
-// Strict Sequential Sr No Calculation
+// Auto-lookup package fees
+function autoFillPackageFees() {
+  const pkg = packageSelect.value;
+  const cat = categorySelect.value;
+  const dur = durationSelect.value;
+
+  if (pkg && cat && dur && PRICING_TABLE[pkg] && PRICING_TABLE[pkg][cat]) {
+    const fee = PRICING_TABLE[pkg][cat][dur] || 0;
+    packageFeesInput.value = fee;
+    isManualFinalAmount = false;
+    recalculateFinalAmount();
+  }
+}
+
+packageSelect.addEventListener('change', autoFillPackageFees);
+categorySelect.addEventListener('change', autoFillPackageFees);
+durationSelect.addEventListener('change', autoFillPackageFees);
+
 function getCleanEntries() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw || raw === '[]') return [];
   try {
     const list = JSON.parse(raw);
     if (!Array.isArray(list)) return [];
-    return list.filter(item => item && item.name); // Filter empty records
+    return list.filter(item => item && item.name);
   } catch (e) {
     return [];
   }
 }
 
-// Date & Time Helpers
+function updateSrNo() {
+  const srInput = document.getElementById('srNo');
+  if (srInput) {
+    const entries = getCleanEntries();
+    srInput.value = entries.length > 0 ? entries.length + 1 : 1;
+  }
+}
+
+window.deleteEntry = function(index) {
+  const list = getCleanEntries();
+  list.splice(index, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  updateSrNo();
+};
+
+updateSrNo();
+
 function formatWordDate(dateString) {
   if (!dateString) return '';
   const parts = dateString.split('-');
@@ -60,7 +111,6 @@ function getFormattedTimestamp() {
   return `${day} ${month} ${year} ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
 }
 
-// Two-way Auto Calculation
 function recalculateFinalAmount() {
   const fees = parseFloat(packageFeesInput.value) || 0;
   const disc = parseFloat(discountInput.value) || 0;
@@ -134,9 +184,9 @@ document.getElementById('resetBtn')?.addEventListener('click', () => {
   splitSection.style.display = 'none';
   isManualFinalAmount = false;
   updateLiveSummary();
+  updateSrNo();
 });
 
-// Single Entry WhatsApp Formatter
 function buildSingleEntryMessage(item) {
   let text = `🔄 *REBORN FITNESS CLUB - RENEW MEMBER ENTRY* 🔄\n`;
   text += `━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -144,6 +194,7 @@ function buildSingleEntryMessage(item) {
   text += `📦 *Package:* ${item.package} (${item.category})\n`;
   text += `⏳ *Duration:* ${item.duration}\n`;
   text += `📅 *Start Date:* ${item.startDate}\n`;
+  text += `⏸️ *Gap Tha Ya Nhi:* ${item.gapStatus}\n`;
   text += `🏷️ *Package Fees:* ₹${item.packageFees}\n`;
   text += `🎁 *Discount:* ₹${item.discount}\n`;
   text += `💳 *Final Paid:* *₹${item.finalAmount}* (${item.paymentMode})\n`;
@@ -158,12 +209,10 @@ function buildSingleEntryMessage(item) {
   return text;
 }
 
-// Form Submission: Save + Pre-filled WhatsApp Trigger
 document.getElementById('renewForm').addEventListener('submit', function (e) {
   e.preventDefault();
 
   const currentList = getCleanEntries();
-
   const mode = paymentModeSelect.value;
   const finalAmount = parseFloat(finalAmountInput.value) || 0;
   let cash = 0;
@@ -181,10 +230,11 @@ document.getElementById('renewForm').addEventListener('submit', function (e) {
   const singleEntry = {
     action: 'saveRenewEntry',
     name: document.getElementById('name').value.trim(),
-    package: document.getElementById('package').value,
-    category: document.getElementById('category').value,
-    duration: document.getElementById('duration').value,
+    package: packageSelect.value,
+    category: categorySelect.value,
+    duration: durationSelect.value,
     startDate: formatWordDate(document.getElementById('startDate').value),
+    gapStatus: gapStatusSelect.value,
     packageFees: parseFloat(packageFeesInput.value) || 0,
     discount: parseFloat(discountInput.value) || 0,
     finalAmount: finalAmount,
@@ -195,11 +245,9 @@ document.getElementById('renewForm').addEventListener('submit', function (e) {
     createdBy: document.getElementById('createdBy').value
   };
 
-  // 1. Save locally with strict sequence
   currentList.push(singleEntry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(currentList));
 
-  // 2. Dispatch to Google Sheet in the background
   fetch(APPSCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
@@ -207,16 +255,13 @@ document.getElementById('renewForm').addEventListener('submit', function (e) {
     body: JSON.stringify(singleEntry)
   }).catch(err => console.error(err));
 
-  // 3. Format message
   const singleMessage = buildSingleEntryMessage(singleEntry);
+  navigator.clipboard.writeText(singleMessage).catch(() => {});
+  window.open(GROUP_URL, '_blank');
 
-  // 4. Open WhatsApp with message pre-filled in the text box
-  const prefilledUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(singleMessage)}`;
-  window.open(prefilledUrl, '_blank');
-
-  // 5. Reset UI & update Sr No for next entry
   this.reset();
   splitSection.style.display = 'none';
   isManualFinalAmount = false;
   updateLiveSummary();
+  updateSrNo();
 });

@@ -10,20 +10,18 @@ function doPost(e) {
     var rawData = e.postData.contents;
     var data = JSON.parse(rawData);
 
-    // Identify target tab
     var sheetName = (data.action === 'saveNewMemberEntry') ? 'NewMembers' : 'RenewMembers';
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName(sheetName);
 
-    // Column Order:
-    // Sr No | Member Name | Package | Category | Duration | Start Date | Package Fees | Discount | Final Paid | Payment Mode | Cash (₹) | Online (₹) | Timestamp | Entry Done By
+    // 14 Columns Order (Sr No excluded)
     var headers = [
-      'Sr No',
       'Member Name',
       'Package',
       'Category',
       'Duration',
       'Start Date',
+      'Gap Tha Ya Nhi',
       'Package Fees',
       'Discount',
       'Final Paid',
@@ -34,20 +32,19 @@ function doPost(e) {
       'Entry Done By'
     ];
 
-    // Create & style sheet if it doesn't exist
     if (!sheet) {
       sheet = ss.insertSheet(sheetName);
       sheet.appendRow(headers);
       applySheetStyles(sheet);
     }
 
-    // Append row matching the exact order
     var rowData = [
       data.name || '',
       data.package || '',
       data.category || '',
       data.duration || '',
       data.startDate || '',
+      data.gapStatus || '',
       data.packageFees || 0,
       data.discount || 0,
       data.finalAmount || 0,
@@ -60,22 +57,21 @@ function doPost(e) {
 
     sheet.appendRow(rowData);
 
-    // Dynamic row formatting
     var lastRow = sheet.getLastRow();
     var rowRange = sheet.getRange(lastRow, 1, 1, headers.length);
     rowRange.setFontFamily("Inter").setFontSize(10).setVerticalAlignment("middle");
 
     // Alignments
-    sheet.getRange(lastRow, 1).setHorizontalAlignment("center"); // Sr No
-    sheet.getRange(lastRow, 3, 1, 4).setHorizontalAlignment("center"); // Package, Category, Duration, Start Date
+    sheet.getRange(lastRow, 1).setHorizontalAlignment("left"); // Member Name
+    sheet.getRange(lastRow, 2, 1, 5).setHorizontalAlignment("center"); // Package, Category, Duration, Start Date, Gap
     sheet.getRange(lastRow, 7, 1, 3).setNumberFormat("₹#,##0").setHorizontalAlignment("right"); // Fees, Disc, Final
     sheet.getRange(lastRow, 10).setHorizontalAlignment("center"); // Payment Mode
     sheet.getRange(lastRow, 11, 1, 2).setNumberFormat("₹#,##0").setHorizontalAlignment("right"); // Cash, Online
     sheet.getRange(lastRow, 13, 1, 2).setHorizontalAlignment("center"); // Timestamp, Done By
 
-    // Alternating zebra striping
+    // Zebra striping
     if (lastRow % 2 === 0) {
-      rowRange.setBackground("#fdf2f2"); // Soft red-tinted light row
+      rowRange.setBackground("#fdf2f2");
     } else {
       rowRange.setBackground("#ffffff");
     }
@@ -91,11 +87,10 @@ function doPost(e) {
   }
 }
 
-// Applies modern theme, borders, sticky header, and auto dimensions
 function applySheetStyles(sheet) {
   var headerRange = sheet.getRange(1, 1, 1, 14);
   headerRange
-    .setBackground("#d90429") // Sporty Reborn Red
+    .setBackground("#d90429")
     .setFontColor("#ffffff")
     .setFontWeight("bold")
     .setFontSize(10)
@@ -110,5 +105,5 @@ function applySheetStyles(sheet) {
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput("Reborn API running.");
+  return ContentService.createTextOutput("Reborn Operations API is live.");
 }
