@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'reborn_new_member_entries';
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/YOUR_NEW_MEMBER_SCRIPT_ID/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVgQnDBdYBN4HktX2bAOpNJ53YJSncJc68N7kYssgYa49RLdSy65PdcUTBya8jsPKKEA/exec';
 const GROUP_URL = 'https://chat.whatsapp.com/FK75LJTbMuVHjpwvbeCYvA?s=cl&p=i&mlu=4&ilr=4';
 
 const monthNames = [
@@ -231,11 +231,11 @@ document.getElementById('newMemberForm').addEventListener('submit', function (e)
   localStorage.setItem(STORAGE_KEY, JSON.stringify(currentList));
 
   fetch(APPSCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(singleEntry)
-  }).catch(err => console.error(err));
+  method: 'POST',
+  mode: 'no-cors',
+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  body: JSON.stringify(singleEntry)
+});
 
   const singleMessage = buildSingleEntryMessage(singleEntry);
   navigator.clipboard.writeText(singleMessage).catch(() => {});

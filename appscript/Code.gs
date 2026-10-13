@@ -1,20 +1,28 @@
 /**
- * Reborn Fitness Club - Backend & Sheet Stylizer
+ * REBORN FITNESS CLUB - UNIFIED BACKEND
+ * Handles both Renew and New Member Sheets directly via IDs
  */
+
+// 🔴 APNI DONO GOOGLE SHEETS KI ID YAHAN PASTE KARO:
+var RENEW_SHEET_ID = "https://script.google.com/macros/s/AKfycbw1UefEJKUYTkntZo4RjtyZVx2rMxok-rFkWV2UgEZi8YIcCc_-tvd5lJ6BPUiW1ALr6w/exec";
+var NEW_MEMBER_SHEET_ID = "https://script.google.com/macros/s/AKfycbzVgQnDBdYBN4HktX2bAOpNJ53YJSncJc68N7kYssgYa49RLdSy65PdcUTBya8jsPKKEA/exec";
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.tryLock(10000);
 
   try {
-    var rawData = e.postData.contents;
-    var data = JSON.parse(rawData);
+    var contents = e.postData.contents;
+    var data = JSON.parse(contents);
 
-    var sheetName = (data.action === 'saveNewMemberEntry') ? 'NewMembers' : 'RenewMembers';
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(sheetName);
+    // Faisla karo kis Sheet ID par bhejna hai
+    var targetSpreadsheetId = (data.action === 'saveNewMemberEntry') ? NEW_MEMBER_SHEET_ID : RENEW_SHEET_ID;
+    
+    // Open targeted spreadsheet
+    var ss = SpreadsheetApp.openById(targetSpreadsheetId);
+    var sheet = ss.getSheets()[0]; // Pehla tab
 
-    // 14 Columns Order (Sr No excluded)
+    // 14 Columns Header
     var headers = [
       'Member Name',
       'Package',
@@ -32,12 +40,13 @@ function doPost(e) {
       'Entry Done By'
     ];
 
-    if (!sheet) {
-      sheet = ss.insertSheet(sheetName);
+    // Agar sheet blank hai toh headers daalo
+    if (sheet.getLastRow() === 0) {
       sheet.appendRow(headers);
       applySheetStyles(sheet);
     }
 
+    // Row Data Array
     var rowData = [
       data.name || '',
       data.package || '',
@@ -61,7 +70,6 @@ function doPost(e) {
     var rowRange = sheet.getRange(lastRow, 1, 1, headers.length);
     rowRange.setFontFamily("Inter").setFontSize(10).setVerticalAlignment("middle");
 
-    // Alignments
     sheet.getRange(lastRow, 1).setHorizontalAlignment("left"); // Member Name
     sheet.getRange(lastRow, 2, 1, 5).setHorizontalAlignment("center"); // Package, Category, Duration, Start Date, Gap
     sheet.getRange(lastRow, 7, 1, 3).setNumberFormat("₹#,##0").setHorizontalAlignment("right"); // Fees, Disc, Final
@@ -69,18 +77,17 @@ function doPost(e) {
     sheet.getRange(lastRow, 11, 1, 2).setNumberFormat("₹#,##0").setHorizontalAlignment("right"); // Cash, Online
     sheet.getRange(lastRow, 13, 1, 2).setHorizontalAlignment("center"); // Timestamp, Done By
 
-    // Zebra striping
     if (lastRow % 2 === 0) {
       rowRange.setBackground("#fdf2f2");
     } else {
       rowRange.setBackground("#ffffff");
     }
 
-    return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ status: 'error', error: error.toString() }))
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", error: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   } finally {
     lock.releaseLock();
@@ -105,5 +112,5 @@ function applySheetStyles(sheet) {
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput("Reborn Operations API is live.");
+  return ContentService.createTextOutput("Reborn API running successfully.");
 }

@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'reborn_renew_entries';
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/YOUR_RENEW_SCRIPT_ID/exec';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1UefEJKUYTkntZo4RjtyZVx2rMxok-rFkWV2UgEZi8YIcCc_-tvd5lJ6BPUiW1ALr6w/exec';
 const GROUP_URL = 'https://chat.whatsapp.com/FK75LJTbMuVHjpwvbeCYvA?s=cl&p=i&mlu=4&ilr=4';
 
 const monthNames = [
@@ -249,11 +249,11 @@ document.getElementById('renewForm').addEventListener('submit', function (e) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(currentList));
 
   fetch(APPSCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(singleEntry)
-  }).catch(err => console.error(err));
+  method: 'POST',
+  mode: 'no-cors',
+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  body: JSON.stringify(singleEntry)
+});
 
   const singleMessage = buildSingleEntryMessage(singleEntry);
   navigator.clipboard.writeText(singleMessage).catch(() => {});
