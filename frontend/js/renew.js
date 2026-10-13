@@ -7,7 +7,7 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-// Price matrix derived directly from the Reborn plans poster
+// Price chart directly from Reborn poster
 const PRICING_TABLE = {
   "Gym only": {
     "Gents": { "1 month": 1200, "3 months": 3300, "6 months": 6000, "1 year": 10800 },
@@ -42,7 +42,7 @@ const sumOnline = document.getElementById('sumOnline');
 
 let isManualFinalAmount = false;
 
-// Auto-lookup package fees
+// Auto-fill Package Fees based on Package + Category + Duration
 function autoFillPackageFees() {
   const pkg = packageSelect.value;
   const cat = categorySelect.value;
@@ -71,23 +71,6 @@ function getCleanEntries() {
     return [];
   }
 }
-
-function updateSrNo() {
-  const srInput = document.getElementById('srNo');
-  if (srInput) {
-    const entries = getCleanEntries();
-    srInput.value = entries.length > 0 ? entries.length + 1 : 1;
-  }
-}
-
-window.deleteEntry = function(index) {
-  const list = getCleanEntries();
-  list.splice(index, 1);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  updateSrNo();
-};
-
-updateSrNo();
 
 function formatWordDate(dateString) {
   if (!dateString) return '';
@@ -184,7 +167,6 @@ document.getElementById('resetBtn')?.addEventListener('click', () => {
   splitSection.style.display = 'none';
   isManualFinalAmount = false;
   updateLiveSummary();
-  updateSrNo();
 });
 
 function buildSingleEntryMessage(item) {
@@ -244,30 +226,29 @@ document.getElementById('renewForm').addEventListener('submit', function (e) {
     createdBy: document.getElementById('createdBy').value
   };
 
-  // 1. Local Cache mein add
+  // 1. Message banao
+  const singleMessage = buildSingleEntryMessage(singleEntry);
+
+  // 2. Direct Clipboard par copy karo
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(singleMessage).catch(() => {});
+  }
+
+  // 3. Direct aapka WhatsApp Group link open hoga
+  window.open(GROUP_URL, '_blank');
+
+  // 4. Local storage update
   const currentList = getCleanEntries();
   currentList.push(singleEntry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(currentList));
 
-  // 2. Google Sheets ko background mein send karo (Non-blocking)
+  // 5. Google Sheets ko background mein send karo
   fetch(APPSCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(singleEntry)
   }).catch(err => console.error('Sheet save error:', err));
-
-  // 3. Formatted single message prepare karo
-  const singleMessage = buildSingleEntryMessage(singleEntry);
-
-  // 4. Clipboard mein copy backup
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(singleMessage).catch(() => {});
-  }
-
-  // 5. Pre-filled WhatsApp Open (Direct text ke saath)
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(singleMessage)}`;
-  window.open(whatsappUrl, '_blank');
 
   // 6. Form reset
   this.reset();
