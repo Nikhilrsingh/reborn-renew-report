@@ -194,7 +194,6 @@ function buildSingleEntryMessage(item) {
 document.getElementById('newMemberForm').addEventListener('submit', function (e) {
   e.preventDefault();
 
-  const currentList = getCleanEntries();
   const mode = paymentModeSelect.value;
   const finalAmount = parseFloat(finalAmountInput.value) || 0;
   let cash = 0;
@@ -227,20 +226,32 @@ document.getElementById('newMemberForm').addEventListener('submit', function (e)
     createdBy: document.getElementById('createdBy').value
   };
 
+  // 1. Local Cache mein add
+  const currentList = getCleanEntries();
   currentList.push(singleEntry);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(currentList));
 
+  // 2. Google Sheets ko background mein send karo (Non-blocking)
   fetch(APPSCRIPT_URL, {
-  method: 'POST',
-  mode: 'no-cors',
-  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-  body: JSON.stringify(singleEntry)
-});
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(singleEntry)
+  }).catch(err => console.error('Sheet save error:', err));
 
+  // 3. Formatted single message prepare karo
   const singleMessage = buildSingleEntryMessage(singleEntry);
-  navigator.clipboard.writeText(singleMessage).catch(() => {});
-  window.open(GROUP_URL, '_blank');
 
+  // 4. Clipboard mein copy backup
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(singleMessage).catch(() => {});
+  }
+
+  // 5. Pre-filled WhatsApp Open (Direct text ke saath)
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(singleMessage)}`;
+  window.open(whatsappUrl, '_blank');
+
+  // 6. Form reset
   this.reset();
   splitSection.style.display = 'none';
   isManualFinalAmount = false;
