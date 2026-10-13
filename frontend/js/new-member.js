@@ -230,12 +230,13 @@ document.getElementById('newMemberForm').addEventListener('submit', function (e)
   const singleMessage = buildSingleEntryMessage(singleEntry);
 
   // 2. Direct Clipboard par copy karo
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(singleMessage).catch(() => {});
-  }
+  // if (navigator.clipboard && navigator.clipboard.writeText) {
+  //   navigator.clipboard.writeText(singleMessage).catch(() => {});
+  // }
 
-  // 3. Direct aapka WhatsApp Group link open hoga
-  window.open(GROUP_URL, '_blank');
+  // 3. Direct Pre-filled WhatsApp Open (Box mein typed aayega)
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(singleMessage)}`;
+  window.open(whatsappUrl, '_blank');
 
   // 4. Local storage update
   const currentList = getCleanEntries();
